@@ -1,0 +1,7 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+PROJECT(Semaphores)
+INCLUDE_DIRECTORIES( include lib )
+
+ADD_SUBDIRECTORY( src lib )
+ADD_SUBDIRECTORY( exampleProgram bin )
