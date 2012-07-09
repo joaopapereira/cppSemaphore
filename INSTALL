@@ -43,7 +43,7 @@ you want to change it or regenerate `configure' using a newer version
 of `autoconf'.
 
 The simplest way to compile this package is:
-
+  1. cmake -DLOCAL_LIBS=modules/lib/ .
   1. `cd' to the directory containing the package's source code and type
      `./configure' to configure the package for your system.
 

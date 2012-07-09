@@ -17,13 +17,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "libJPSemaphores.h"
+#include "libJPSemaphores.hpp"
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <iostream>
-#include "MLog.hpp"
+#include <libJPLogger.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -32,17 +32,17 @@
 #define _SEMDEFVAL 0
 #define _SEMDEFMAX 1
 
-int MSemaphoreId::semIdentifier = 1000;
-int MSemaphoreId::getnextId(){
+int JPSemaphoreId::semIdentifier = 1000;
+int JPSemaphoreId::getnextId(){
 	return semIdentifier++;
 }
 
 
 static std::string modName("SEM");
-MSemaphore::MSemaphore( int semId , int sValue )
+JPSemaphore::JPSemaphore( int semId , int sValue )
 {
 //	sem_init( &sem , pShared , sValue );
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"MSemaphore(%d,%d)",semId,sValue);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"JPSemaphore(%d,%d)",semId,sValue);
 	this->semId = semId;
 	actualValue = sValue;
 	maxValue = sValue;
@@ -59,74 +59,51 @@ MSemaphore::MSemaphore( int semId , int sValue )
 	if( SEM_FAILED != sem )
 		initSem();
 	else{
-		MLog::instance()->log(modName,M_LOG_LOW,M_LOG_ERR,"EMSemaphore(%d,%d):this=%p:errno",semId,actualValue,this,errno);
+		OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_ERR,"EJPSemaphore(%d,%d):this=%p:errno",semId,actualValue,this,errno);
 	}
 	free( semName );
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"EMSemaphore(%d,%d):this=%p",semId,actualValue,this);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"EJPSemaphore(%d,%d):this=%p",semId,actualValue,this);
 }
 
-MSemaphore::MSemaphore()
+JPSemaphore::JPSemaphore()
 {
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"MSemaphore()");
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"JPSemaphore()");
 //	sem_init( &sem , 0 , 1 );
-	semId = MSemaphoreId::getnextId();
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"semId(%d)",semId);
+	semId = JPSemaphoreId::getnextId();
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"semId(%d)",semId);
 	actualValue = _SEMDEFVAL;
 	maxValue = _SEMDEFMAX;
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"actualValue(%d), maxValue(%d)", actualValue,maxValue);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"actualValue(%d), maxValue(%d)", actualValue,maxValue);
 	//char * semName = (char*)malloc( sizeof(char) * 50);
 	char semName[50];
 	//char semName[100];
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"done alloc");
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"done alloc");
 	sprintf(semName,"M%d_%d",semId,getpid());
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"semname(%s)",semName);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"semname(%s)",semName);
 	sem = sem_open(semName, O_CREAT , S_IRUSR|S_IWUSR, 0);
 	//if( res != -1 )
 	if( SEM_FAILED != sem )
 		initSem();
 	//free( semName );
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"EMSemaphore(%d,%d):this=%p",semId,actualValue,this);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"EJPSemaphore(%d,%d):this=%p",semId,actualValue,this);
 }
 
-MSemaphore::~MSemaphore()
+JPSemaphore::~JPSemaphore()
 {
 	//int res = (semctl (semId, 0, IPC_RMID, NULL));
 	int res = sem_close(sem);
-	if( res == 0 )
-		initSem();
+	/*if( res == 0 )
+		initSem();*/
 //	sem_destroy( &sem );
 }
 
-int MSemaphore::signal()
-{
-	/*struct sembuf up = { 0, 1, 0 };
-	return (semop (semId, &up, 1));*/
-	//return sem_post(&sem);
-}
 
-int MSemaphore::connect()
-{
-/*
-	int result = sem_wait( &sem );
-	char answer[100];
-	sprintf(answer,"result:[%d], errno:[%d] sem:[%p] down!",result,errno,&sem);
-	std::cerr << answer<< std::endl;
-	return result;*/
-	/*
-	struct sembuf init[2] = {{ 0, -1, 0 }, {0, 1, 0}};
-	if ((semId = semget ((key_t) semId, 1, _SEMBASEMASK)) == -1)
-		return (-1);
-	else if( semop (semId, init, 2) == -1)
-		return (-1);
-	else return (semId);
-*/
-}
-int MSemaphore::down(){
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"down():this=%p,id[%d]",this,semId);
+int JPSemaphore::down(){
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"down():this=%p,id[%d]",this,semId);
 	return int_down();
 }
-int MSemaphore::int_down(){
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"int_down():this=%p,id[%d]",this,semId);
+int JPSemaphore::int_down(){
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"int_down():this=%p,id[%d]",this,semId);
 //	struct sembuf down = { semId, -1, SEM_UNDO };
 	int stat,actVal;
 
@@ -135,31 +112,26 @@ int MSemaphore::int_down(){
 //	down.sem_flg = SEM_UNDO;
 	/*do {
 		stat = semop (semId, &down, 1);
-		MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"Edown():this=%p:statsemop=%d:errno=%d:msg=%s",this,stat,errno, strerror(errno) );
+		OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"Edown():this=%p:statsemop=%d:errno=%d:msg=%s",this,stat,errno, strerror(errno) );
 	}while((stat == -1) && (errno == EINTR));*/
 	stat =  sem_wait( sem );
 	if( 0 != stat ){
-		MLog::instance()->log(modName,M_LOG_LOW,M_LOG_ERR,"Edown():this=%p:statsemop=%d:errno=%d:msg=%s",this,stat,errno, strerror(errno) );
+		OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_ERR,"Edown():this=%p:statsemop=%d:errno=%d:msg=%s",this,stat,errno, strerror(errno) );
 		return -1;
 	}
 	actualValue--;
 	stat = sem_getvalue(sem , &actVal );
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"Eint_down():this=%p:val=%d",this,actVal);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"Eint_down():this=%p:val=%d",this,actVal);
 
 	return stat;
 }
 
-int MSemaphore::tryDown()
-{
-	//return sem_trywait( &sem );
-	return 0;
-}
-int MSemaphore::up(){
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"up():this=%p,id[%d]",this,semId);
+int JPSemaphore::up(){
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"up():this=%p,id[%d]",this,semId);
 	return int_up();
 }
-int MSemaphore::int_up(){
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"int_up():this=%p,id[%d]",this,semId);
+int JPSemaphore::int_up(){
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"int_up():this=%p,id[%d]",this,semId);
 //	struct sembuf up = { semId, 1, 0 };
 	int stat,actVal;
 
@@ -171,50 +143,53 @@ int MSemaphore::int_up(){
 	} while ((stat == -1) && (errno == EINTR));*/
 	stat =  sem_post( sem );
 	if( 0 != stat ){
-		MLog::instance()->log(modName,M_LOG_LOW,M_LOG_ERR,"Eint_down():this=%p:statsemop=%d:errno=%d:msg=%s",this,stat,errno, strerror(errno) );
+		OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_ERR,"Eint_down():this=%p:statsemop=%d:errno=%d:msg=%s",this,stat,errno, strerror(errno) );
 		return -1;
 	}
 
 	actualValue++;
 	stat = sem_getvalue(sem , &actVal );
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"Eup():this=%p:val=%d",this,actVal);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"Eup():this=%p:val=%d",this,actVal);
 	return stat;
 }
 
-int MSemaphore::initSem(){
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"initSem():this=%p",this);
+int JPSemaphore::initSem(){
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"initSem():this=%p",this);
 	for( int i = 0 ; i < maxValue ; i++ )
 		up();
 	return 0;
 }
-int MSemaphore::value(){
-	return actualValue;
-}
 
 
-MBinSemaphore::MBinSemaphore( int semId , int sValue )
-:MSemaphore( semId , sValue )
+JPBinSemaphore::JPBinSemaphore( int semId , int sValue )
+:JPSemaphore( semId , sValue )
 {
 	this->maxValue = 1;
 }
 
-MBinSemaphore::MBinSemaphore()
-:MSemaphore()
+JPBinSemaphore::JPBinSemaphore()
+:JPSemaphore()
 {
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"MBinSemaphore()");
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"JPBinSemaphore()");
 	this->maxValue = 1;
 
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"EMBinSemaphore(%d,%d):this=%p",semId,actualValue,this);
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"EJPBinSemaphore(%d,%d):this=%p",semId,actualValue,this);
 }
 int
-MBinSemaphore::initSem(){
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"initSem():this=%p",this);
+JPBinSemaphore::initSem(){
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"initSem():this=%p",this);
 	up();
 	return 0;
 }
+JPBinSemaphore::~JPBinSemaphore()
+{
+
+	int res = sem_close(sem);
+
+}
 int
-MBinSemaphore::up(){
-	MLog::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"up():this=%p,id[%d]",this,semId);
+JPBinSemaphore::up(){
+	OneInstanceLogger::instance()->log(modName,M_LOG_LOW,M_LOG_TRC,"up():this=%p,id[%d]",this,semId);
 	if( this->maxValue != this->actualValue )
 		return int_up();
 	return -1;
