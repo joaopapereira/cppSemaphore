@@ -14,6 +14,29 @@ find_library( CPPJPLOGGER_LIB NAMES logger
 find_library(logger REQUIRED)
 include_directories(${logger_INCLUDE_DIRS})
 
+IF( UNIX )
+   ADD_CUSTOM_TARGET( distclean @@echo cleaning for source distribution)
+  SET(DISTCLEANED
+   cmake.depends
+   cmake.check_depends
+   CMakeCache.txt
+   cmake.check_cache
+   *.cmake
+   Makefile
+   core core.*
+   gmon.out
+   *~
+  )
+  
+  ADD_CUSTOM_COMMAND(
+    DEPENDS clean
+    COMMENT "distribution clean"
+    COMMAND rm
+    ARGS    -Rf CMakeTmp ${DISTCLEANED}
+    TARGET  distclean
+  )
+ENDIF( UNIX )
+
 #if( NOT CPPJPLOGGER_LIB )
 #   EXECUTE_PROCESS( 
 #                COMMAND cd modules/
