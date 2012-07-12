@@ -1,19 +1,46 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_HOME_DIRECTORY}/lib)
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_HOME_DIRECTORY}/bin)
+IF( DEFINED ENV{INSTALL_LIB_DIR} )
+   SET(INSTALL_LIBS $ENV{INSTALL_LIB_DIR}/ )
+ELSE()
+   SET(INSTALL_LIBS ${CMAKE_HOME_DIRECTORY}/lib )
+ENDIF()
+IF( DEFINED ENV{INSTALL_INC_DIR} )
+   SET(INSTALL_INCS $ENV{INSTALL_INC_DIR}/ )
+ELSE()
+   SET(INSTALL_INCS ${CMAKE_HOME_DIRECTORY}/include )
+ENDIF()
+
+
+SET(LIBRARY_OUTPUT_PATH .)
+SET(EXECUTABLE_OUTPUT_PATH .)
 
 PROJECT(Semaphores)
-INCLUDE_DIRECTORIES( include lib modules/include modules/lib)
+INCLUDE_DIRECTORIES( include lib ${INSTALL_LIBS} ${INSTALL_INCS})
 
 ADD_SUBDIRECTORY( src lib )
 ADD_SUBDIRECTORY( exampleProgram bin )
-find_library( CPPJPLOGGER_LIB NAMES logger
-		PATHS ${LOCAL_LIBS} )
+#####################################
+# Search for needed lib
+#####################################
+FIND_LIBRARY( CPPJPLOGGER_LIB NAMES logger
+		PATHS ${LOCAL_LIBS} ${INSTALL_LIBS} )
 
 find_library(logger REQUIRED)
 include_directories(${logger_INCLUDE_DIRS})
 
+#####################################
+# Instalation section
+#####################################
+INSTALL( FILES include/libJPSemaphores.hpp
+         DESTINATION ${INSTALL_INCS} )
+
+INSTALL( FILES lib/libJPSemaphores.so
+         DESTINATION ${INSTALL_LIBS} )
+
+#####################################
+# Others
+#####################################
 IF( UNIX )
    ADD_CUSTOM_TARGET( distclean @@echo cleaning for source distribution)
   SET(DISTCLEANED
@@ -21,11 +48,15 @@ IF( UNIX )
    cmake.check_depends
    CMakeCache.txt
    cmake.check_cache
-   *.cmake
    Makefile
    core core.*
    gmon.out
    *~
+   lib
+   CMakeFiles
+   bin
+   install_*
+   cmake_install.cmake 
   )
   
   ADD_CUSTOM_COMMAND(
@@ -35,16 +66,23 @@ IF( UNIX )
     ARGS    -Rf CMakeTmp ${DISTCLEANED}
     TARGET  distclean
   )
+
+  EXECUTE_PROCESS(
+    COMMAND ls -l ${CMAKE_HOME_DIRECTORY}/modules/ 
+    COMMAND wc -l
+    OUTPUT_VARIABLE output
+  )
+  
+  IF( ${output} GREATER 1 )
+      EXECUTE_PROCESS(
+         COMMAND cd modules; cmake .; make; cd -
+         OUTPUT_VARIABLE output
+      )
+      INSTALL( FILES include/libJPLogger.h
+               DESTINATION ${INSTALL_INCS} )
+
+      INSTALL( FILES lib/liblogger.so
+               DESTINATION ${INSTALL_LIBS} )
+  ENDIF()
 ENDIF( UNIX )
 
-#if( NOT CPPJPLOGGER_LIB )
-#   EXECUTE_PROCESS( 
-#                COMMAND cd modules/
-#                COMMAND cmake -DLOCAL_LIBS=${LOCAL_LIBS} .
-#		OUTPUT_VARIABLE _output
-#                ERROR_VARIABLE  _error  )
-#   message(AUTHOR_WARNING "entrou no normal \"${_output}\"\n\"${_error}\"")                  
-#else( NOT CPPJPLOGGER_LIB ) 
-#   message(AUTHOR_WARNING "foi para o else")                  
-#endif( NOT CPPJPLOGGER_LIB )
-   
