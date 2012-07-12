@@ -67,22 +67,5 @@ IF( UNIX )
     TARGET  distclean
   )
 
-  EXECUTE_PROCESS(
-    COMMAND ls -l ${CMAKE_HOME_DIRECTORY}/modules/ 
-    COMMAND wc -l
-    OUTPUT_VARIABLE output
-  )
-  
-  IF( ${output} GREATER 1 )
-      EXECUTE_PROCESS(
-         COMMAND cd modules; cmake .; make; cd -
-         OUTPUT_VARIABLE output
-      )
-      INSTALL( FILES include/libJPLogger.h
-               DESTINATION ${INSTALL_INCS} )
-
-      INSTALL( FILES lib/liblogger.so
-               DESTINATION ${INSTALL_LIBS} )
-  ENDIF()
 ENDIF( UNIX )
 

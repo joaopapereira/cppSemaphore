@@ -2,8 +2,8 @@
 
 IF(NOT(logger_LIBRARY AND logger_INCLUDE_DIR))
 	# search for include and library path
-	FIND_PATH(logger_INCLUDE_DIR  libJPLogger.h PATHS ${LOCAL_INC} )
-	FIND_LIBRARY(logger_LIBRARY logger PATHS ${LOCAL_LIBS} )
+	FIND_PATH(logger_INCLUDE_DIR  libJPLogger.h PATHS ${INSTALL_INCS} )
+	FIND_LIBRARY(logger_LIBRARY logger PATHS ${INSTALL_LIBS} )
 
 	IF(logger_INCLUDE_DIR AND logger_LIBRARY)
 		SET(logger_FOUND TRUE)
