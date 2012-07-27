@@ -11,6 +11,10 @@ ELSE()
    SET(INSTALL_INCS ${CMAKE_HOME_DIRECTORY}/include )
 ENDIF()
 
+IF( EXISTS ${INSTALL_LIBS}/libJPSemaphores.so )
+	return()
+ENDIF()
+
 
 SET(LIBRARY_OUTPUT_PATH .)
 SET(EXECUTABLE_OUTPUT_PATH .)
@@ -19,7 +23,7 @@ PROJECT(Semaphores)
 INCLUDE_DIRECTORIES( include lib ${INSTALL_LIBS} ${INSTALL_INCS})
 
 ADD_SUBDIRECTORY( src lib )
-ADD_SUBDIRECTORY( exampleProgram bin )
+#ADD_SUBDIRECTORY( exampleProgram bin )
 #####################################
 # Search for needed lib
 #####################################
