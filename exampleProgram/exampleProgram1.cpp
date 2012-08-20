@@ -12,12 +12,13 @@
                Here the script will be called exampleProgram.
  ============================================================================
  */
-#include "libJPLogger.h"
+#include "libJPLogger.hpp"
 #include "libJPSemaphores.hpp"
 #include <unistd.h>
 #include <iostream>
 
 #define MAX_PROCESS 5
+using namespace jpCppLibs;
 
 int main(void) {
   Logger log("/tmp/test.log");

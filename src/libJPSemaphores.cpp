@@ -23,9 +23,10 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <iostream>
-#include <libJPLogger.h>
+#include <libJPLogger.hpp>
 #include <string.h>
 #include <stdlib.h>
+using namespace jpCppLibs;
 
 #define _SEMBASEMASK 0666
 #define _SEMDEFID 1234

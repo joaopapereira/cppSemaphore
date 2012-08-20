@@ -1,5 +1,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+#####################################
+## Option part
+#####################################
+option(semaphore_build_samples "Build semaphore sample programs." OFF)
+option(compile_with_debug "Build library with debug." OFF)
 
+#####################################
+## Definition of environment
+#####################################
 IF( DEFINED ENV{INSTALL_LIB_DIR} )
    SET(INSTALL_LIBS $ENV{INSTALL_LIB_DIR}/ )
 ELSE()
@@ -19,11 +27,27 @@ ENDIF()
 SET(LIBRARY_OUTPUT_PATH .)
 SET(EXECUTABLE_OUTPUT_PATH .)
 
+#####################################
+## Project name
+#####################################
 PROJECT(Semaphores)
+
+#####################################
+## Include directories 
+#####################################
 INCLUDE_DIRECTORIES( include lib ${INSTALL_LIBS} ${INSTALL_INCS})
 
+#####################################
+## Folders to be build
+#####################################
 ADD_SUBDIRECTORY( src lib )
 #ADD_SUBDIRECTORY( exampleProgram bin )
+#####################################
+## Samples to be build
+#####################################
+if( semaphore_build_samples)
+	ADD_SUBDIRECTORY( exampleProgram bin )
+endif()
 #####################################
 # Search for needed lib
 #####################################
@@ -39,6 +63,8 @@ include_directories(${logger_INCLUDE_DIRS})
 INSTALL( FILES include/libJPSemaphores.hpp
          DESTINATION ${INSTALL_INCS} )
 
+INSTALL( FILES lib/libJPSemaphoresStatic.a
+         DESTINATION ${INSTALL_LIBS} )
 INSTALL( FILES lib/libJPSemaphores.so
          DESTINATION ${INSTALL_LIBS} )
 
@@ -61,6 +87,8 @@ IF( UNIX )
    bin
    install_*
    cmake_install.cmake 
+   doc/docs/
+   doc/semaphore.dox
   )
   
   ADD_CUSTOM_COMMAND(
@@ -72,4 +100,20 @@ IF( UNIX )
   )
 
 ENDIF( UNIX )
+if( compile_with_debug )
+	set(CMAKE_CXX_FLAGS "-DDEBUG=1")
+	set(CMAKE_BUILD_TYPE Debug)
+endif()
 
+#####################################
+# add a target to generate API documentation with Doxygen
+#####################################
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/semaphore.dox.in ${CMAKE_CURRENT_BINARY_DIR}/doc/semaphore.dox @ONLY)
+	add_custom_target(docs
+			${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/semaphore.dox
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+			COMMENT "Generating Semaphore documentation with Doxygen" VERBATIM
+)
+endif(DOXYGEN_FOUND)

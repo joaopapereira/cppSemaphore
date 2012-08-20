@@ -1,16 +1,16 @@
-# find logger
+# find JPLoggerStatic
 
-IF(NOT(logger_LIBRARY AND logger_INCLUDE_DIR))
+IF(NOT(JPLoggerStatic_LIBRARY AND JPLoggerStatic_INCLUDE_DIR))
 	# search for include and library path
-	FIND_PATH(logger_INCLUDE_DIR  libJPLogger.h PATHS ${INSTALL_INCS} )
-	FIND_LIBRARY(logger_LIBRARY logger PATHS ${INSTALL_LIBS} )
+	FIND_PATH(JPLoggerStatic_INCLUDE_DIR  libJPLogger.hpp PATHS ${INSTALL_INCS} )
+	FIND_LIBRARY(JPLoggerStatic_LIBRARY JPLoggerStatic PATHS ${INSTALL_LIBS} )
 
-	IF(logger_INCLUDE_DIR AND logger_LIBRARY)
-		SET(logger_FOUND TRUE)
-		MESSAGE(STATUS "Found logger: ${logger_LIBRARY}")
+	IF(JPLoggerStatic_INCLUDE_DIR AND JPLoggerStatic_LIBRARY)
+		SET(JPLoggerStatic_FOUND TRUE)
+		MESSAGE(STATUS "Found JPLoggerStatic: ${JPLoggerStatic_LIBRARY}")
 
-	ELSE(logger_INCLUDE_DIR AND logger_LIBRARY)
-		SET(logger_FOUND FALSE)
-		MESSAGE(SEND_ERROR "Could NOT find logger")
-	ENDIF(logger_INCLUDE_DIR AND logger_LIBRARY)
-ENDIF( NOT ( logger_LIBRARY AND logger_INCLUDE_DIR) )
+	ELSE(JPLoggerStatic_INCLUDE_DIR AND JPLoggerStatic_LIBRARY)
+		SET(JPLoggerStatic_FOUND FALSE)
+		MESSAGE(SEND_ERROR "Could NOT find JPLoggerStatic")
+	ENDIF(JPLoggerStatic_INCLUDE_DIR AND JPLoggerStatic_LIBRARY)
+ENDIF( NOT ( JPLoggerStatic_LIBRARY AND JPLoggerStatic_INCLUDE_DIR) )
